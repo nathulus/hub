@@ -625,10 +625,105 @@ body {
 }
 @media (max-width: 700px) {
     #chat-popup {
-        right: 2vw;
-        left: 2vw;
-        width: 96vw;
-        min-width: unset;
+        right: 1vw;
+        left: 1vw;
+        width: 98vw;
+        min-width: 0;
+        min-height: 320px;
         max-height: 90vh;
+        padding: 0;
+        border-radius: 10px;
+    }
+    .chat-body {
+        padding: 10px 4px 8px 4px;
+    }
+    #chat-header {
+        padding: 12px 8px;
+        font-size: 1em;
+    }
+    #chat-messages {
+        max-height: 35vh;
+        font-size: 0.98em;
+        padding-right: 0;
+    }
+    #chat-form {
+        flex-direction: column;
+        gap: 6px;
+    }
+    #chat-input {
+        width: 100%;
+        min-width: 0;
+        font-size: 1em;
+        padding: 10px 8px;
+        margin-right: 0;
+    }
+    #chat-send-btn {
+        width: 100%;
+        height: 44px;
+        font-size: 1.1em;
+        padding: 0;
+    }
+}
+@media (max-width: 600px) {
+    #chat-popup {
+        right: 0;
+        left: 0;
+        width: 100vw;
+        min-width: 0;
+        min-height: 60vh;
+        max-height: 98vh;
+        padding: 0;
+        border-radius: 6px;
+        resize: none;
+        box-shadow: 0 4px 16px rgba(79,70,229,0.10);
+    }
+    #chat-header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background: #f3f4f6;
+        padding: 10px 4px;
+        font-size: 1.05em;
+    }
+    .chat-body {
+        padding: 6px 2px 4px 2px;
+    }
+    #chat-messages {
+        max-height: 55vh;
+        font-size: 1.08em;
+        padding-right: 0;
+        padding-left: 0;
+        margin-bottom: 6px;
+    }
+    .chat-message, .chat-message.ia, .chat-message.user {
+        padding: 8px 8px;
+        font-size: 1.08em;
+        margin-left: 0;
+        margin-right: 0;
+        max-width: 98%;
+    }
+    #chat-form {
+        flex-direction: row;
+        gap: 6px;
+        margin-bottom: 2px;
+    }
+    #chat-input {
+        width: 100%;
+        min-width: 0;
+        font-size: 1.12em;
+        padding: 12px 10px;
+        margin-right: 0;
+        border-radius: 8px;
+    }
+    #chat-send-btn {
+        width: auto;
+        min-width: 44px;
+        height: 44px;
+        font-size: 1.15em;
+        padding: 0 14px;
+        border-radius: 8px;
+    }
+    #chat-messages::-webkit-scrollbar {
+        width: 4px;
     }
 }
