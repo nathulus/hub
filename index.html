@@ -28,6 +28,7 @@
                 <div class="topbar-title" id="current-site-title">Tableau de Bord</div>
                 <div class="topbar-buttons">
                     <button class="btn" id="refresh-frame-btn"><i class="fas fa-sync-alt"></i><span>Rafraîchir</span></button>
+                    <button class="btn" id="open-chat-btn"><i class="fas fa-comments"></i><span>IA</span></button>
                 </div>
             </header>
             <section class="content-area">
@@ -38,6 +39,19 @@
                 <iframe id="content-frame" src="about:blank" frameborder="0" style="display: none;"></iframe>
             </section>
         </main>
+    </div>
+    <div id="chat-popup" class="chat-popup" style="display:none;">
+        <div id="chat-header" class="chat-header">
+            <span>Chat IA (Groq)</span>
+            <button id="chat-close-btn" title="Fermer"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="chat-body">
+            <div id="chat-messages" class="chat-messages"></div>
+            <form id="chat-form" class="chat-form">
+                <input type="text" id="chat-input" placeholder="Écris ton message..." autocomplete="off" />
+                <button type="submit" id="chat-send-btn"><i class="fas fa-paper-plane"></i></button>
+            </form>
+        </div>
     </div>
     <script src="script.js"></script>
 </body>
