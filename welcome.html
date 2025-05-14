@@ -180,10 +180,18 @@
         </ul>
     </div>
 
+    <div class="section-container">
+        <h2>Espace Collège</h2>
+        <ul class="infra-sites-list" id="college-sites-list">
+            <li>Chargement des liens collège...</li>
+        </ul>
+    </div>
+
     <script>
         console.log("[welcome.html] Script started.");
 
         const infraSitesListElement = document.getElementById('infra-sites-list');
+        const collegeSitesListElement = document.getElementById('college-sites-list');
 
         const getFaviconUrl = (url) => {
             try {
@@ -195,6 +203,26 @@
             }
         };
 
+        // Liens collège à afficher dans la nouvelle section
+        const collegeSites = [
+            {
+                name: "ENT Occitanie",
+                url: "https://cas.mon-ent-occitanie.fr/login?service=https%3A%2F%2Fla-petite-camargue.mon-ent-occitanie.fr%2Fsg.do%3FPROC%3DCDT_SEANCE%26ACTION%3DVIEW_SEANCE%26FILTREMETIER%3D%5BCDTPERSO%40%24P%24NOE05182%40%40%40%5D%26FLUSH%3D1%26ID_SEANCE%3D571682#a_214165",
+                description: "Espace numérique de travail Occitanie"
+            },
+            {
+                name: "Manuel Sésamath",
+                url: "https://manuel.sesamath.net/numerique/?ouvrage=cycle4_2016",
+                description: "Manuel numérique de mathématiques"
+            },
+            {
+                name: "Pronote",
+                url: "https://0342076x.index-education.net/pronote/eleve.html?identifiant=sJpjgVhShd7cStY5",
+                description: "Cahier de texte et notes"
+            }
+        ];
+
+        // Affiche les liens infra dans un nouvel onglet
         const populateInfraSites = (sites) => {
             console.log("[welcome.html] populateInfraSites called with sites:", sites);
             infraSitesListElement.innerHTML = '';
@@ -213,8 +241,7 @@
                 img.alt = `Icone ${site.name}`;
                 img.classList.add('site-icon');
                 img.onerror = function() {
-                    console.warn(`[welcome.html] Failed to load favicon for ${site.name}: ${this.src}. Using fallback.`);
-                    this.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🌐</text></svg>';
+                    this.src = 'data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><text y=\".9em\" font-size=\"90\">🌐</text></svg>';
                     this.style.backgroundColor = 'transparent';
                     this.onerror = null;
                 };
@@ -234,17 +261,11 @@
                 urlP.textContent = site.url;
 
                 const visitLink = document.createElement('a');
-                visitLink.href = "#";
+                visitLink.href = site.url;
                 visitLink.textContent = "Visiter";
                 visitLink.classList.add('visit-link');
-                visitLink.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    window.parent.postMessage({
-                        type: 'navigateToUrl',
-                        url: site.url,
-                        name: site.name
-                    }, '*');
-                });
+                visitLink.target = "_blank";
+                visitLink.rel = "noopener noreferrer";
 
                 infoDiv.appendChild(h3);
                 infoDiv.appendChild(description);
@@ -258,14 +279,59 @@
             });
         };
 
+        // Affiche les liens collège dans une frame dédiée (même logique que infra)
+        const populateCollegeSites = (sites) => {
+            collegeSitesListElement.innerHTML = '';
+            if (!sites || sites.length === 0) {
+                collegeSitesListElement.innerHTML = '<li>Aucun lien collège configuré.</li>';
+                return;
+            }
+            sites.forEach(site => {
+                const li = document.createElement('li');
+                const img = document.createElement('img');
+                img.src = getFaviconUrl(site.url);
+                img.alt = `Icone ${site.name}`;
+                img.classList.add('site-icon');
+                img.onerror = function() {
+                    this.src = 'data:image/svg+xml,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 100 100\"><text y=\".9em\" font-size=\"90\">🌐</text></svg>';
+                    this.style.backgroundColor = 'transparent';
+                    this.onerror = null;
+                };
+                const infoDiv = document.createElement('div');
+                infoDiv.classList.add('infra-site-info');
+                const h3 = document.createElement('h3');
+                h3.textContent = site.name;
+                const description = document.createElement('p');
+                description.classList.add('description');
+                description.textContent = site.description || 'Pas de description.';
+                const urlP = document.createElement('p');
+                urlP.classList.add('url');
+                urlP.textContent = site.url;
+                const visitLink = document.createElement('a');
+                visitLink.href = site.url;
+                visitLink.textContent = "Visiter";
+                visitLink.classList.add('visit-link');
+                visitLink.target = "_blank";
+                visitLink.rel = "noopener noreferrer";
+                infoDiv.appendChild(h3);
+                infoDiv.appendChild(description);
+                infoDiv.appendChild(urlP);
+                infoDiv.appendChild(visitLink);
+                li.appendChild(img);
+                li.appendChild(infoDiv);
+                collegeSitesListElement.appendChild(li);
+            });
+        };
+
         window.addEventListener('message', (event) => {
             const message = event.data;
-
             if (message.type === 'loadInfraSites' && message.sites) {
                 console.log("Received infra sites data from parent.");
                 populateInfraSites(message.sites);
             }
         });
+        // Affichage direct des liens collège
+        populateCollegeSites(collegeSites);
     </script>
 </body>
 </html>
