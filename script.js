@@ -372,8 +372,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     document.addEventListener('mousemove', (e) => {
         if (isDragging) {
-            chatPopup.style.left = (e.clientX - dragOffsetX) + 'px';
-            chatPopup.style.top = (e.clientY - dragOffsetY) + 'px';
+            // Calcul des nouvelles positions
+            let newLeft = e.clientX - dragOffsetX;
+            let newTop = e.clientY - dragOffsetY;
+            // Limites de la fenêtre (collision)
+            const minLeft = 0;
+            const minTop = 0;
+            const maxLeft = window.innerWidth - chatPopup.offsetWidth;
+            const maxTop = window.innerHeight - chatPopup.offsetHeight;
+            // Clamp
+            newLeft = Math.max(minLeft, Math.min(newLeft, maxLeft));
+            newTop = Math.max(minTop, Math.min(newTop, maxTop));
+            chatPopup.style.left = newLeft + 'px';
+            chatPopup.style.top = newTop + 'px';
             chatPopup.style.right = 'auto';
         }
     });
