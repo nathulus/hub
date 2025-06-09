@@ -155,7 +155,33 @@
                     <label>Lien Vidéo 3 (Optionnel)</label>
                     <input type="url" id="videoLink3" placeholder="URL de la vidéo 3">
                 </div>
-                <button class="note-submit" onclick="submitNewChapter()">Ajouter le chapitre</button>
+                <div class="popup-actions">
+                    <button class="note-submit" onclick="submitNewChapter()">
+                        <i class="fas fa-save"></i> Enregistrer
+                    </button>
+                    <button class="delete-btn" id="deleteChapterBtn" onclick="deleteChapter(document.getElementById('chapterId').value)" style="display: none;">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Popup de confirmation -->
+    <div class="confirm-popup" id="confirmPopup">
+        <div class="confirm-popup-content">
+            <div class="confirm-popup-header">
+                <div class="confirm-popup-title">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Confirmation
+                </div>
+            </div>
+            <div class="confirm-popup-body">
+                <p id="confirmMessage">Êtes-vous sûr de vouloir effectuer cette action ?</p>
+            </div>
+            <div class="confirm-popup-actions">
+                <button class="confirm-btn confirm-cancel" onclick="closeConfirmPopup()">Annuler</button>
+                <button class="confirm-btn confirm-yes" id="confirmYesBtn">Confirmer</button>
             </div>
         </div>
     </div>
@@ -165,26 +191,46 @@
         const SUPABASE_URL = 'https://yfxbheoyavydissfpvwh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmeGJoZW95YXZ5ZGlzc2ZwdndoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgwOTI0NTEsImV4cCI6MjA2MzY2ODQ1MX0.n10JVF_CSap7fmdbQYcgpmtrfacOX9HBaSB779KrV1o';
 
-        // Configuration des matières avec leurs emojis
+        // Corriger la configuration des matières
         const SUBJECTS_CONFIG = {
-            'Histoire': { emoji: '📚', color: 'var(--primary-color)' },
-            'Geographie': { emoji: '🗺️', color: 'var(--primary-color)' },
-            'Français': { emoji: '📝', color: 'var(--primary-color)' },
-            'Mathematiques': { emoji: '📐', color: 'var(--primary-color)' },
-            'Physique': { emoji: '⚡', color: 'var(--primary-color)' },
-            'Chimie': { emoji: '🧪', color: 'var(--primary-color)' },
-            'SVT': { emoji: '🔬', color: 'var(--primary-color)' },
-            'Technologie': { emoji: '💻', color: 'var(--primary-color)' },
-            'Anglais': { emoji: '🇬🇧', color: 'var(--primary-color)' },
-            'Espagnol': { emoji: '🇪🇸', color: 'var(--primary-color)' },
-            'emc': { emoji: '⚖️', color: 'var(--primary-color)' }
+            'Histoire': { emoji: '🏛️', color: 'var(--primary-color)', type: 'histoire', display: 'Histoire' },
+            'Géographie': { emoji: '🗺️', color: 'var(--primary-color)', type: 'geographie', display: 'Géographie' },
+            'EMC': { emoji: '⚖️', color: 'var(--primary-color)', type: 'emc', display: 'EMC' },
+            'Français': { emoji: '📚', color: 'var(--primary-color)', type: 'francais', display: 'Français' },
+            'Mathématiques': { emoji: '📐', color: 'var(--primary-color)', type: 'mathematiques', display: 'Mathématiques' },
+            'Physique': { emoji: '⚡', color: 'var(--primary-color)', type: 'physique', display: 'Physique' },
+            'Chimie': { emoji: '🧪', color: 'var(--primary-color)', type: 'chimie', display: 'Chimie' },
+            'SVT': { emoji: '🧬', color: 'var(--primary-color)', type: 'svt', display: 'SVT' },
+            'Technologie': { emoji: '🔧', color: 'var(--primary-color)', type: 'techno', display: 'Technologie' },
+            'Anglais': { emoji: '🇬🇧', color: 'var(--primary-color)', type: 'anglais', display: 'Anglais' },
+            'Espagnol': { emoji: '🇪🇸', color: 'var(--primary-color)', type: 'espagnol', display: 'Espagnol' }
         };
 
-        // Fonction pour créer une carte de matière
-        function createSubjectCard(subject, emoji, color) {
-            const config = SUBJECTS_CONFIG[subject] || { emoji: '📚', color: 'var(--primary-color)' };
+        // Map de correspondance pour gérer la casse
+        const TYPE_MAP = {
+            'histoire': 'Histoire',
+            'geographie': 'Geographie',
+            'emc': 'emc',
+            'francais': 'Francais',
+            'mathematiques': 'Mathematiques',
+            'physique': 'Physique',
+            'chimie': 'Chimie',
+            'svt': 'SVT',
+            'techno': 'Techno',
+            'anglais': 'Anglais',
+            'espagnol': 'Espagnol'
+        };
+
+        // 2. Remplacer la fonction createSubjectCard
+        function createSubjectCard(subject) {
+            const config = SUBJECTS_CONFIG[subject];
+            if (!config) {
+                console.error('Configuration manquante pour:', subject);
+                return '';
+            }
+            
             return `
-                <div class="subject-card ${subject.toLowerCase()}">
+                <div class="subject-card ${config.type}">
                     <div class="subject-header" onclick="toggleSubject(this)">
                         <div class="subject-title">
                             <div class="subject-emoji">${config.emoji}</div>
@@ -200,9 +246,7 @@
                         </div>
                     </div>
                     <div class="chapters-content" style="display: none;">
-                        <div class="chapters-list">
-                            <!-- Les chapitres seront ajoutés ici -->
-                        </div>
+                        <div class="chapters-list"></div>
                     </div>
                 </div>
             `;
@@ -210,7 +254,15 @@
 
         // Modifier la fonction addChapter pour mieux gérer l'affichage
         function addChapter(subject, chapterName, description, links, ressources, chapterId) {
-            const subjectCard = document.querySelector(`.subject-card.${subject.toLowerCase()}`);
+            // Trouver la bonne matière dans SUBJECTS_CONFIG
+            const subjectEntry = Object.entries(SUBJECTS_CONFIG).find(([_, config]) => config.type === subject);
+            if (!subjectEntry) {
+                console.error("Matière non trouvée pour le type:", subject);
+                return;
+            }
+            
+            const [subjectKey] = subjectEntry;
+            const subjectCard = document.querySelector(`.subject-card.${subject}`);
             if (subjectCard) {
                 const chaptersList = subjectCard.querySelector('.chapters-list');
                 if (chaptersList) {
@@ -285,9 +337,11 @@
                     `;
                     chaptersList.appendChild(chapterItem);
                     updateStats();
+                } else {
+                    console.error("Liste des chapitres non trouvée pour:", subject);
                 }
             } else {
-                console.warn(`Carte de matière non trouvée pour: ${subject}`);
+                console.error("Carte de matière non trouvée pour:", subject);
             }
         }
 
@@ -296,7 +350,7 @@
             return SUBJECTS_CONFIG[subject]?.emoji || '📚';
         }
 
-        // Fonction pour charger les chapitres depuis Supabase
+        // 3. Modifier la fonction loadChapters
         async function loadChapters() {
             try {
                 const response = await fetch(`${SUPABASE_URL}/rest/v1/revisions?select=*`, {
@@ -306,88 +360,57 @@
                     }
                 });
                 
-                if (!response.ok) {
-                    throw new Error(`Erreur HTTP: ${response.status}`);
-                }
+                if (!response.ok) throw new Error(`Erreur HTTP: ${response.status}`);
                 
                 const chapters = await response.json();
-                console.log('Chapitres chargés:', chapters);
-                
-                // Grouper les chapitres par matière
                 const chaptersBySubject = {};
+                
                 chapters.forEach(chapter => {
-                    console.log('Matière trouvée:', chapter.matiere, 'Type:', typeof chapter.matiere);
-                    if (!chaptersBySubject[chapter.matiere]) {
-                        chaptersBySubject[chapter.matiere] = [];
+                    const matiere = chapter.matiere.toLowerCase();
+                    // Trouver la matière correspondante dans SUBJECTS_CONFIG
+                    const subjectEntry = Object.entries(SUBJECTS_CONFIG).find(
+                        ([_, config]) => config.type === matiere
+                    );
+                    
+                    if (subjectEntry) {
+                        const [subject] = subjectEntry;
+                        if (!chaptersBySubject[subject]) {
+                            chaptersBySubject[subject] = [];
+                        }
+                        chaptersBySubject[subject].push(chapter);
                     }
-                    chaptersBySubject[chapter.matiere].push(chapter);
                 });
 
-                console.log('Matières groupées:', Object.keys(chaptersBySubject));
-
-                // Vider complètement le conteneur des matières
                 const subjectsContainer = document.querySelector('.subjects-container');
                 subjectsContainer.innerHTML = '';
 
-                // Créer les cartes pour chaque matière unique
-                for (const [subject, subjectChapters] of Object.entries(chaptersBySubject)) {
-                    console.log('Création de la carte pour:', subject);
-                    const config = SUBJECTS_CONFIG[subject];
-                    console.log('Configuration trouvée:', config);
-                    
-                    if (!config) {
-                        console.warn('Pas de configuration trouvée pour:', subject);
-                    }
-
-                    const newCard = createSubjectCard(
-                        subject,
-                        config ? config.emoji : '📚',
-                        config ? config.color : 'var(--primary-color)'
-                    );
+                // Créer les cartes pour toutes les matières
+                Object.keys(SUBJECTS_CONFIG).forEach(subject => {
+                    const newCard = createSubjectCard(subject);
                     subjectsContainer.insertAdjacentHTML('beforeend', newCard);
+                });
 
-                    const subjectCard = document.querySelector(`.subject-card.${subject.toLowerCase()}`);
-                    if (subjectCard) {
-                        const chaptersList = subjectCard.querySelector('.chapters-list');
-                        const chaptersContent = subjectCard.querySelector('.chapters-content');
-                        if (chaptersList && chaptersContent) {
-                            chaptersContent.style.display = 'none';
-                            const arrow = subjectCard.querySelector('.subject-arrow i');
-                            if (arrow) {
-                                arrow.classList.remove('fa-chevron-up');
-                                arrow.classList.add('fa-chevron-down');
-                            }
-                            
-                            // Trier les chapitres par ID numérique
-                            subjectChapters.sort((a, b) => {
-                                // Supposer que l'ID est une chaîne comme 'H1', 'G2', 'EMC3'
-                                // On extrait le numéro à la fin
-                                const idA = parseInt(a.id.replace(/[^0-9]/g, ''), 10);
-                                const idB = parseInt(b.id.replace(/[^0-9]/g, ''), 10);
-                                return idA - idB;
-                            });
+                // Ajouter les chapitres
+                Object.entries(chaptersBySubject).forEach(([subject, subjectChapters]) => {
+                    subjectChapters.forEach(chapter => {
+                        addChapter(
+                            SUBJECTS_CONFIG[subject].type,
+                            chapter.chapitre,
+                            '',
+                            [],
+                            {
+                                quiz: [chapter.lien_quiz_1, chapter.lien_quiz_2, chapter.lien_quiz_3].filter(Boolean),
+                                videos: [chapter.lien_video_1, chapter.lien_video_2, chapter.lien_video_3].filter(Boolean)
+                            },
+                            chapter.id
+                        );
+                    });
+                });
 
-                            subjectChapters.forEach(chapter => {
-                                addChapter(
-                                    subject,
-                                    chapter.chapitre,
-                                    chapter.description || '',
-                                    chapter.liens || [],
-                                    {
-                                        quiz: [chapter.lien_quiz_1, chapter.lien_quiz_2, chapter.lien_quiz_3],
-                                        videos: [chapter.lien_video_1, chapter.lien_video_2, chapter.lien_video_3]
-                                    },
-                                    chapter.id
-                                );
-                            });
-                        }
-                    }
-                }
-                
                 updateStats();
             } catch (error) {
                 console.error('Erreur lors du chargement des chapitres:', error);
-                showCustomAlert('Erreur lors du chargement des chapitres. Veuillez réessayer.', 'error');
+                showCustomAlert('Erreur lors du chargement des chapitres: ' + error.message, 'error');
             }
         }
 
@@ -659,16 +682,23 @@
         // Modifier les fonctions de gestion du popup
         function showAddChapterPopup(isEditing = false) {
             const popup = document.getElementById('addChapterPopup');
+            const deleteBtn = document.getElementById('deleteChapterBtn');
             popup.style.display = 'flex';
             popup.classList.add('active');
+            
+            // Afficher/masquer le bouton supprimer selon le mode
+            deleteBtn.style.display = isEditing ? 'block' : 'none';
+            
             if (!isEditing) {
                 resetAddChapterForm();
             }
         }
 
          function resetAddChapterForm() {
+            const chapterIdInput = document.getElementById('chapterId');
+            chapterIdInput.readOnly = false;
+            chapterIdInput.value = '';
             document.getElementById('subjectSelect').value = '';
-            document.getElementById('chapterId').value = '';
             document.getElementById('chapterName').value = '';
             document.getElementById('quizLink1').value = '';
             document.getElementById('quizLink2').value = '';
@@ -703,96 +733,59 @@
             }
         });
 
-        async function submitNewChapter() {
-            const subject = document.getElementById('subjectSelect').value;
+        async function submitNewChapter(event) {
+            if (event) event.preventDefault();
+            
+            const selectedSubject = document.getElementById('subjectSelect').value;
+            const config = SUBJECTS_CONFIG[selectedSubject];
             const chapterId = document.getElementById('chapterId').value;
             const chapterName = document.getElementById('chapterName').value;
+            const isEditing = document.getElementById('chapterId').readOnly;
 
-            const quizLink1 = document.getElementById('quizLink1').value;
-            const quizLink2 = document.getElementById('quizLink2').value;
-            const quizLink3 = document.getElementById('quizLink3').value;
-            const videoLink1 = document.getElementById('videoLink1').value;
-            const videoLink2 = document.getElementById('videoLink2').value;
-            const videoLink3 = document.getElementById('videoLink3').value;
-
-            if (!subject || !chapterId || !chapterName) {
-                showCustomAlert('Veuillez remplir tous les champs obligatoires (Matière, ID, Nom)', 'warning');
+            if (!config || !chapterId || !chapterName) {
+                showCustomAlert('Veuillez remplir tous les champs obligatoires', 'warning');
                 return;
             }
 
-            // Déterminer le type de matière - Assurez-vous que les valeurs correspondent exactement à l'ENUM de la DB
-            let matiereType = subject; // Utiliser le nom de la matière comme type par défaut
-
-            // Ajustements pour les cas spécifiques qui diffèrent du nom de la matière
-            if (subject === 'Technologie') {
-                matiereType = 'Techno'; // **CORRIGÉ** : Doit correspondre exactement à la valeur dans l'ENUM de la DB
-            } else if (subject === 'EMC') {
-                 matiereType = 'emc'; // Doit correspondre exactement à la valeur dans l'ENUM de la DB
-            } else if (subject === 'Géographie') { // Ajouter ce cas si 'Géographie' n'est pas dans l'ENUM mais 'Geographie' l'est
-                 matiereType = 'Geographie';
-            } else if (subject === 'Mathématiques') { // Ajouter ce cas si 'Mathématiques' n'est pas dans l'ENUM mais 'Mathematiques' l'est
-                 matiereType = 'Mathematiques';
-            } else if (subject === 'Français') { // Ajouter ce cas si 'Français' n'est pas dans l'ENUM mais 'Francais' l'est
-                 matiereType = 'Francais';
-            }
-            // Pour les autres matières, assurez-vous que le nom dans le <select> correspond exactement
-            // à la valeur dans l'ENUM de la base de données.
-
             try {
-                // Vérifier si le chapitre existe déjà
-                const checkResponse = await fetch(`${SUPABASE_URL}/rest/v1/revisions?id=eq.${chapterId}`, {
-                    headers: {
-                        'apikey': SUPABASE_KEY,
-                        'Authorization': `Bearer ${SUPABASE_KEY}`
-                    }
-                });
+                const data = {
+                    id: chapterId,
+                    chapitre: chapterName,
+                    matiere: config.type,
+                    lien_quiz_1: document.getElementById('quizLink1').value || null,
+                    lien_quiz_2: document.getElementById('quizLink2').value || null,
+                    lien_quiz_3: document.getElementById('quizLink3').value || null,
+                    lien_video_1: document.getElementById('videoLink1').value || null,
+                    lien_video_2: document.getElementById('videoLink2').value || null,
+                    lien_video_3: document.getElementById('videoLink3').value || null
+                };
 
-                const existingChapters = await checkResponse.json();
-                const method = existingChapters.length > 0 ? 'PATCH' : 'POST';
-                const url = existingChapters.length > 0 
-                    ? `${SUPABASE_URL}/rest/v1/revisions?id=eq.${chapterId}`
-                    : `${SUPABASE_URL}/rest/v1/revisions`;
-
-                const response = await fetch(url, {
-                    method: method,
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/revisions${isEditing ? `?id=eq.${chapterId}` : ''}`, {
+                    method: isEditing ? 'PATCH' : 'POST',
                     headers: {
                         'apikey': SUPABASE_KEY,
                         'Authorization': `Bearer ${SUPABASE_KEY}`,
                         'Content-Type': 'application/json',
                         'Prefer': 'return=minimal'
                     },
-                    body: JSON.stringify({
-                        matiere: subject, // Envoyer le nom complet de la matière pour l'affichage
-                        id: chapterId,
-                        chapitre: chapterName,
-                        lien_quiz_1: quizLink1 || null,
-                        lien_quiz_2: quizLink2 || null,
-                        lien_quiz_3: quizLink3 || null,
-                        lien_video_1: videoLink1 || null,
-                        lien_video_2: videoLink2 || null,
-                        lien_video_3: videoLink3 || null,
-                        matiere_type: matiereType // Envoyer la valeur corrigée pour l'ENUM
-                    })
+                    body: JSON.stringify(data)
                 });
 
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || `Erreur HTTP: ${response.status}`);
+                    throw new Error(isEditing ? 'Erreur lors de la modification du chapitre' : 'Erreur lors de la création du chapitre');
                 }
 
-                showCustomAlert(existingChapters.length > 0 ? 'Chapitre mis à jour avec succès !' : 'Chapitre ajouté avec succès !', 'success');
+                showCustomAlert(isEditing ? 'Chapitre modifié avec succès!' : 'Chapitre ajouté avec succès!', 'success');
                 closeAddChapterPopup();
-                
-                // Recharger les chapitres après modification/ajout
                 await loadChapters();
             } catch (error) {
-                console.error('Erreur lors de la modification du chapitre:', error);
-                showCustomAlert(`Erreur lors de la modification du chapitre: ${error.message}`, 'error');
+                console.error('Erreur:', error);
+                showCustomAlert(error.message, 'error');
             }
         }
 
-        // Ajouter une fonction pour charger les données d'un chapitre existant
-        async function loadChapterData(chapterId) {
+        // Modifier la fonction editChapter
+        async function editChapter(chapterId) {
             try {
                 const response = await fetch(`${SUPABASE_URL}/rest/v1/revisions?id=eq.${chapterId}`, {
                     headers: {
@@ -802,32 +795,66 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error(`Erreur HTTP: ${response.status}`);
+                    throw new Error('Erreur lors du chargement du chapitre');
                 }
 
                 const chapters = await response.json();
                 if (chapters.length > 0) {
                     const chapter = chapters[0];
-                    document.getElementById('subjectSelect').value = chapter.matiere;
-                    document.getElementById('chapterId').value = chapter.id;
-                    document.getElementById('chapterName').value = chapter.chapitre;
-                    document.getElementById('quizLink1').value = chapter.lien_quiz_1 || '';
-                    document.getElementById('quizLink2').value = chapter.lien_quiz_2 || '';
-                    document.getElementById('quizLink3').value = chapter.lien_quiz_3 || '';
-                    document.getElementById('videoLink1').value = chapter.lien_video_1 || '';
-                    document.getElementById('videoLink2').value = chapter.lien_video_2 || '';
-                    document.getElementById('videoLink3').value = chapter.lien_video_3 || '';
+                    // Rechercher la matière correspondante
+                    const subjectEntry = Object.entries(SUBJECTS_CONFIG).find(
+                        ([_, config]) => config.type.toLowerCase() === chapter.matiere.toLowerCase()
+                    );
+                    
+                    if (subjectEntry) {
+                        const [subjectKey] = subjectEntry;
+                        document.getElementById('subjectSelect').value = subjectKey;
+                        const chapterIdInput = document.getElementById('chapterId');
+                        chapterIdInput.value = chapter.id;
+                        chapterIdInput.readOnly = true;
+                        document.getElementById('chapterName').value = chapter.chapitre;
+                        document.getElementById('quizLink1').value = chapter.lien_quiz_1 || '';
+                        document.getElementById('quizLink2').value = chapter.lien_quiz_2 || '';
+                        document.getElementById('quizLink3').value = chapter.lien_quiz_3 || '';
+                        document.getElementById('videoLink1').value = chapter.lien_video_1 || '';
+                        document.getElementById('videoLink2').value = chapter.lien_video_2 || '';
+                        document.getElementById('videoLink3').value = chapter.lien_video_3 || '';
+                        showAddChapterPopup(true);
+                    } else {
+                        console.error('Matière non trouvée:', chapter.matiere);
+                        showCustomAlert('Erreur: Matière non trouvée', 'error');
+                    }
                 }
             } catch (error) {
-                console.error('Erreur lors du chargement des données du chapitre:', error);
-                showCustomAlert('Erreur lors du chargement des données du chapitre.', 'error');
+                console.error('Erreur:', error);
+                showCustomAlert(error.message, 'error');
             }
         }
 
-        // Ajouter la fonction pour éditer un chapitre
-        async function editChapter(chapterId) {
-            await loadChapterData(chapterId);
-            showAddChapterPopup(true);
+        // Fonction pour supprimer un chapitre
+        async function deleteChapter(chapterId) {
+            showConfirmPopup('Êtes-vous sûr de vouloir supprimer ce chapitre ?', async () => {
+                try {
+                    const response = await fetch(`${SUPABASE_URL}/rest/v1/revisions?id=eq.${chapterId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'apikey': SUPABASE_KEY,
+                            'Authorization': `Bearer ${SUPABASE_KEY}`
+                        }
+                    });
+
+                    if (!response.ok) {
+                        throw new Error('Erreur lors de la suppression du chapitre');
+                    }
+
+                    showCustomAlert('Chapitre supprimé avec succès!', 'success');
+                    closeAddChapterPopup();
+                    await loadChapters();
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    showCustomAlert(error.message, 'error');
+                }
+            });
         }
 
         // Fonction pour afficher la notification temporaire
@@ -839,6 +866,31 @@
             setTimeout(() => {
                 notificationPopup.classList.remove('show');
             }, 2000); // 2000 millisecondes = 2 secondes
+        }
+
+        // Ajouter ces nouvelles fonctions
+        function showConfirmPopup(message, callback) {
+            const popup = document.getElementById('confirmPopup');
+            const messageEl = document.getElementById('confirmMessage');
+            const confirmBtn = document.getElementById('confirmYesBtn');
+            
+            messageEl.textContent = message;
+            popup.style.display = 'flex';
+            
+            // Animation d'entrée
+            setTimeout(() => popup.classList.add('active'), 10);
+            
+            // Configurer le bouton de confirmation
+            confirmBtn.onclick = () => {
+                closeConfirmPopup();
+                callback();
+            };
+        }
+
+        function closeConfirmPopup() {
+            const popup = document.getElementById('confirmPopup');
+            popup.classList.remove('active');
+            setTimeout(() => popup.style.display = 'none', 300);
         }
     </script>
 
@@ -916,6 +968,132 @@
                 opacity: 0;
             }
         }
+
+        /* Styles pour le bouton supprimer */
+        .chapter-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .delete-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .delete-btn:hover {
+            background: #cc0000;
+        }
+
+        .note-submit {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .note-popup-content {
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .popup-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        /* Styles pour le popup de confirmation */
+        .confirm-popup {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .confirm-popup.active {
+            opacity: 1;
+        }
+
+        .confirm-popup-content {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            max-width: 400px;
+            width: 90%;
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .confirm-popup.active .confirm-popup-content {
+            transform: scale(1);
+        }
+
+        .confirm-popup-header {
+            margin-bottom: 20px;
+        }
+
+        .confirm-popup-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #ff4444;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .confirm-popup-body {
+            margin-bottom: 20px;
+            color: #666;
+        }
+
+        .confirm-popup-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .confirm-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .confirm-cancel {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .confirm-cancel:hover {
+            background: #e0e0e0;
+        }
+
+        .confirm-yes {
+            background: #ff4444;
+            color: white;
+        }
+
+        .confirm-yes:hover {
+            background: #cc0000;
+        }
     </style>
 </body>
-</html> 
+</html>
