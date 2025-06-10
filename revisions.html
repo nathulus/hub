@@ -272,7 +272,7 @@
         }
 
         // Modifier la fonction addChapter pour mieux gérer l'affichage
-        function addChapter(subject, chapterName, description, links, ressources, chapterId) {
+        function addChapter(subject, chapterName, description, links, ressources, chapterId, termine = false) {
             // Trouver la bonne matière dans SUBJECTS_CONFIG
             const subjectEntry = Object.entries(SUBJECTS_CONFIG).find(([_, config]) => config.type === subject);
             if (!subjectEntry) {
@@ -349,7 +349,7 @@
                             </div>
                         </div>
                         <div class="chapter-complete">
-                            <input type="checkbox" id="complete-${chapterId}" onchange="updateProgress(this)">
+                            <input type="checkbox" id="complete-${chapterId}" onchange="updateProgress(this)" ${termine ? 'checked' : ''}>
                             <label for="complete-${chapterId}">Terminé</label>
                         </div>
                     `;
@@ -410,6 +410,9 @@
 
                 // Ajouter les chapitres
                 Object.entries(chaptersBySubject).forEach(([subject, subjectChapters]) => {
+                    // Trier les chapitres avant de les ajouter
+                    subjectChapters.sort(compareChapterIds);
+                    
                     subjectChapters.forEach(chapter => {
                         addChapter(
                             SUBJECTS_CONFIG[subject].type,
@@ -420,7 +423,8 @@
                                 quiz: [chapter.lien_quiz_1, chapter.lien_quiz_2, chapter.lien_quiz_3].filter(Boolean),
                                 videos: [chapter.lien_video_1, chapter.lien_video_2, chapter.lien_video_3].filter(Boolean)
                             },
-                            chapter.id
+                            chapter.id,
+                            chapter.termine || false // Changé de 'completed' à 'termine'
                         );
                     });
                 });
@@ -430,6 +434,36 @@
                 console.error('Erreur lors du chargement des chapitres:', error);
                 showCustomAlert('Erreur lors du chargement des chapitres: ' + error.message, 'error');
             }
+        }
+
+        // Ajouter cette nouvelle fonction de tri personnalisée avant loadChapters
+        function compareChapterIds(a, b) {
+            // Extraire la lettre et le numéro
+            const aMatch = a.id.match(/^([A-Za-z]+)(.*)$/);
+            const bMatch = b.id.match(/^([A-Za-z]+)(.*)$/);
+            
+            if (!aMatch || !bMatch) return 0;
+            
+            const [, aLetter, aNumber] = aMatch;
+            const [, bLetter, bNumber] = bMatch;
+            
+            // Comparer d'abord les lettres
+            if (aLetter !== bLetter) {
+                return aLetter.localeCompare(bLetter);
+            }
+            
+            // Fonction pour normaliser les numéros
+            const normalizeNumber = (num) => {
+                // Traiter les cas spéciaux comme "2 bis"
+                if (num.includes('bis')) {
+                    const baseNum = num.split(' ')[0];
+                    return parseFloat(baseNum) + 0.5;
+                }
+                return parseFloat(num) || 0;
+            };
+            
+            // Comparer les numéros
+            return normalizeNumber(aNumber) - normalizeNumber(bNumber);
         }
 
         // Fonction pour créer un feu d'artifice
@@ -503,32 +537,59 @@
             }, 1000);
         }
 
-        // Modifier la fonction updateProgress pour inclure l'animation
-        function updateProgress(checkbox) {
+        // Modifier la fonction updateProgress
+        async function updateProgress(checkbox) {
             const chapterItem = checkbox.closest('.chapter-item');
-            const subjectCard = chapterItem.closest('.subject-card');
-            const progressInfo = subjectCard.querySelector('.subject-progress');
-            const totalChapters = subjectCard.querySelectorAll('.chapter-item').length;
-            const completedChapters = subjectCard.querySelectorAll('.chapter-item input[type="checkbox"]:checked').length;
+            const chapterId = chapterItem.querySelector('.chapter-id').textContent;
             
-            progressInfo.querySelector('.completed').textContent = completedChapters;
-            progressInfo.querySelector('.total').textContent = totalChapters;
+            try {
+                // Mettre à jour l'état dans Supabase
+                const response = await fetch(`${SUPABASE_URL}/rest/v1/revisions?id=eq.${chapterId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'apikey': SUPABASE_KEY,
+                        'Authorization': `Bearer ${SUPABASE_KEY}`,
+                        'Content-Type': 'application/json',
+                        'Prefer': 'return=minimal'
+                    },
+                    body: JSON.stringify({
+                        termine: checkbox.checked // Changé de 'completed' à 'termine'
+                    })
+                });
 
-            // Ajouter l'animation de célébration
-            if (checkbox.checked) {
-                const completeButton = chapterItem.querySelector('.chapter-complete');
-                completeButton.classList.add('celebrating');
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('Réponse Supabase:', errorData);
+                    throw new Error(`Erreur lors de la mise à jour du statut: ${errorData.message || 'Erreur inconnue'}`);
+                }
+
+                const subjectCard = chapterItem.closest('.subject-card');
+                const progressInfo = subjectCard.querySelector('.subject-progress');
+                const totalChapters = subjectCard.querySelectorAll('.chapter-item').length;
+                const completedChapters = subjectCard.querySelectorAll('.chapter-item input[type="checkbox"]:checked').length;
+
+                progressInfo.querySelector('.completed').textContent = completedChapters;
+                progressInfo.querySelector('.total').textContent = totalChapters;
+
+                // Animation stuff...
+                if (checkbox.checked) {
+                    const completeButton = chapterItem.querySelector('.chapter-complete');
+                    completeButton.classList.add('celebrating');
+                    createFireworks();
+                    // Ajouter l'alerte personnalisée
+                    const chapterName = chapterItem.querySelector('.chapter-name').textContent;
+                    showCustomAlert(`Chapitre "${chapterName}" terminé !`, 'success', 3000);
+                    setTimeout(() => {
+                        completeButton.classList.remove('celebrating');
+                    }, 500);
+                }
                 
-                // Créer les feux d'artifice sur tout l'écran
-                createFireworks();
-
-                // Retirer la classe d'animation après un délai
-                setTimeout(() => {
-                    completeButton.classList.remove('celebrating');
-                }, 500);
+                updateStats();
+            } catch (error) {
+                console.error('Erreur détaillée:', error);
+                checkbox.checked = !checkbox.checked;
+                showCustomAlert('Erreur lors de la mise à jour: ' + error.message, 'error');
             }
-            
-            updateStats();
         }
 
         // Fonction pour mettre à jour les statistiques
@@ -963,6 +1024,7 @@
                     id: chapterId,
                     chapitre: chapterName,
                     matiere: config.type,
+                    termine: false, // Changé de 'completed' à 'termine'
                     lien_quiz_1: document.getElementById('quizLink1').value || null,
                     lien_quiz_2: document.getElementById('quizLink2').value || null,
                     lien_quiz_3: document.getElementById('quizLink3').value || null,
