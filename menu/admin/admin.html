@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Liens</title>
+    <link rel="stylesheet" href="./admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <div class="welcome-container">
+            <h1>Gestion des Liens</h1>
+            <p>Ajoutez, modifiez ou supprimez les liens de votre hub facilement.</p>
+            <button onclick="exporterCSV()" class="export-button">Exporter en CSV</button>
+        </div>
+
+        <div class="section-container">
+            <h2>Ajouter un lien</h2>
+            <form id="add-link-form">
+                <input type="text" id="nom" placeholder="Nom du lien" class="input" required>
+                <input type="url" id="url" placeholder="URL" class="input" required>
+                <select id="categorie" class="input" required>
+                    <option value="">Sélectionner une catégorie</option>
+                    <option value="app">Application</option>
+                    <option value="college">Collège</option>
+                    <option value="server">Serveur</option>
+                </select>
+                <textarea id="description" placeholder="Description" class="input"></textarea>
+                <button type="submit" class="action-button">Ajouter le lien</button>
+            </form>
+        </div>
+
+        <div class="section-container">
+            <h2>Liste des liens</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom</th>
+                        <th>URL</th>
+                        <th>Catégorie</th>
+                        <th>Description</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="liste-liens"></tbody>
+            </table>
+        </div>
+    </div>
+    <script src="admin.js"></script>
+</body>
+</html> 

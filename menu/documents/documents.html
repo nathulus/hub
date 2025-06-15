@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documents</title>
+    <link rel="stylesheet" href="./documents.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+</head>
+<body>
+    <div class="documents-container">
+        <div class="documents-header">
+            <h1>Mes Documents</h1>
+            <div class="documents-actions">
+                <input type="text" id="searchInput" class="search-input" placeholder="Rechercher...">
+                <div class="filters">
+                    <button class="filter-btn active" data-type="all">Tous</button>
+                    <button class="filter-btn" data-type="image">Images</button>
+                    <button class="filter-btn" data-type="pdf">PDF</button>
+                    <button class="filter-btn" data-type="document">Documents</button>
+                    <button class="filter-btn" data-type="other">Autres</button>
+                </div>
+            </div>
+            <div class="upload-zone" id="uploadZone">
+                <input type="file" id="uploadInput" multiple>
+                <i class="fas fa-cloud-upload-alt fa-2x"></i>
+                <p>Glissez-déposez vos fichiers ici ou cliquez pour sélectionner</p>
+            </div>
+        </div>
+
+        <div id="documentsGrid" class="documents-grid">
+            <!-- Les documents seront ajoutés ici dynamiquement -->
+        </div>
+    </div>
+
+    <script src="../assets/script.js"></script>
+</body>
+</html> 

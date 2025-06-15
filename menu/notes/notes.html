@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes</title>
+    <link rel="stylesheet" href="./notes.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        // Vérification du chargement de Marked
+        window.addEventListener('load', function() {
+            if (typeof marked === 'undefined') {
+                console.error('La bibliothèque Marked n\'est pas chargée');
+                alert('Erreur : La bibliothèque Marked n\'est pas chargée. Veuillez vérifier votre connexion internet.');
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="notes-container">
+        <div class="notes-sidebar">
+            <div class="editor-toolbar">
+                <button id="newNoteBtn" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Nouvelle Note
+                </button>
+            </div>
+            <div id="notesList" class="notes-list">
+                <!-- Les notes seront listées ici -->
+            </div>
+        </div>
+        <div class="note-editor">
+            <div class="editor-toolbar">
+                <input type="text" id="noteTitleInput" class="note-title-input" placeholder="Titre de la note">
+                <button id="saveNoteBtn" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Enregistrer
+                </button>
+                <button id="deleteNoteBtn" class="btn btn-primary" style="background: #ef4444;">
+                    <i class="fas fa-trash"></i> Supprimer
+                </button>
+            </div>
+            <div class="editor-main">
+                <textarea id="noteContent" class="editor-input" placeholder="Écrivez votre note ici (Markdown supporté)..."></textarea>
+                <div id="notePreview" class="editor-preview markdown-content">
+                    <!-- L'aperçu Markdown sera affiché ici -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Conteneur pour les alertes -->
+    <div id="alertContainer"></div>
+    <div id="alertOverlay" class="custom-alert-overlay"></div>
+
+    <!-- Conteneur pour les notifications toast -->
+    <div id="toastContainer"></div>
+
+    <script src="./notes.js"></script>
+</body>
+</html> 
