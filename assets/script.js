@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: "Notes", url: "/menu/notes/notes.html", icon: "fa-sticky-note" },
         { name: "Documents", url: "/menu/documents/documents.html", icon: "fa-file-alt" },
         { name: "Gestion des Liens", url: "/menu/admin/admin.html", icon: "fa-tools" },
-        { name: "A.I", url: "/menu/AI/", icon: "fa-robot" }
+        { name: "A.I", url: "/menu/AI/ai.html", icon: "fa-robot" }
     ];
 
     // === COMMUNICATION AVEC SUPABASE ===
