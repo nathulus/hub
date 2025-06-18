@@ -362,6 +362,7 @@ body {
 .chapter-info {
     flex-grow: 1;
     margin-right: 15px;
+    width: 100%;
 }
 
 .chapter-header {
@@ -916,7 +917,7 @@ body {
     color: var(--dark-bg);
 }
 
-.quiz-note-popup-close {
+.quiz-note-popup_close {
     background: none;
     border: none;
     color: var(--gray-color);
@@ -925,7 +926,7 @@ body {
     padding: 0.25rem;
 }
 
-.quiz-note-popup-close:hover {
+.quiz-note-popup_close:hover {
     color: var(--danger-color);
 }
 
@@ -1312,3 +1313,40 @@ body {
             font-weight: bold;
             font-style: italic;
         }
+
+        /* Styles pour l'emoji et la croix */
+        .subject-emoji.completed {
+            background: var(--success-color);
+        }
+
+        .subject-emoji.completed::before {
+            content: '✓';
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        /* Barre de progression catégorie (matière) */
+.subject-category-progress {
+    width: 100%;
+    padding: 0 1rem 0.5rem 1rem;
+    box-sizing: border-box;
+}
+.subject-category-progress-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(0,0,0,0.08);
+    border-radius: 3px;
+    overflow: hidden;
+}
+.subject-category-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--success-color), var(--primary-color));
+    border-radius: 3px;
+    transition: width 0.4s cubic-bezier(.4,1.4,.6,1);
+}
+
+/* Supprime la barre de progression du chapitre si tu veux */
+.chapter-progress,
+.chapter-progress-fill {
+    display: none !important;
+}
