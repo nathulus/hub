@@ -1,5 +1,4 @@
-
-        // Configuration Supabase
+// Configuration Supabase
         const SUPABASE_URL = 'https://yfxbheoyavydissfpvwh.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlmeGJoZW95YXZ5ZGlzc2ZwdndoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDgwOTI0NTEsImV4cCI6MjA2MzY2ODQ1MX0.n10JVF_CSap7fmdbQYcgpmtrfacOX9HBaSB779KrV1o';
 
@@ -40,7 +39,7 @@
                 console.error('Configuration manquante pour:', subject);
                 return '';
             }
-            
+            // Ajoute la barre de progression à la catégorie
             return `
                 <div class="subject-card ${config.type}">
                     <div class="subject-header" onclick="toggleSubject(this)">
@@ -55,6 +54,11 @@
                             <div class="subject-arrow">
                                 <i class="fas fa-chevron-down"></i>
                             </div>
+                        </div>
+                    </div>
+                    <div class="subject-category-progress">
+                        <div class="subject-category-progress-bar">
+                            <div class="subject-category-progress-fill" style="width:0%"></div>
                         </div>
                     </div>
                     <div class="chapters-content" style="display: none;">
@@ -80,7 +84,27 @@
                 if (chaptersList) {
                     const chapterItem = document.createElement('div');
                     chapterItem.className = 'chapter-item';
-
+                    
+                    // Calculer la progression
+                    let progress = 0;
+                    let totalResources = 0;
+                    let completedResources = 0;
+                    
+                    // Compter les quiz
+                    if (ressources.quiz) {
+                        totalResources += ressources.quiz.length;
+                    }
+                    // Compter les vidéos
+                    if (ressources.videos) {
+                        totalResources += ressources.videos.length;
+                    }
+                    
+                    // Si le chapitre est terminé, toutes les ressources sont complétées
+                    if (termine) {
+                        completedResources = totalResources;
+                        progress = 100;
+                    }
+                    
                     // Construire les boutons de ressources dynamiquement
                     let resourceButtonsHTML = '';
                     // Tous les boutons Quiz appellent maintenant showResource
@@ -366,6 +390,21 @@
 
                 // Animation stuff...
                 if (checkbox.checked) {
+                    // Mettre à jour la barre de progression à 100%
+                    const progressBar = chapterItem.querySelector('.chapter-progress-fill');
+                    progressBar.style.width = '100%';
+                    
+                    // Mettre à jour l'emoji de la matière si tous les chapitres sont terminés
+                    const subjectCard = chapterItem.closest('.subject-card');
+                    const totalChapters = subjectCard.querySelectorAll('.chapter-item').length;
+                    const completedChapters = subjectCard.querySelectorAll('.chapter-item input[type="checkbox"]:checked').length;
+                    
+                    if (totalChapters === completedChapters) {
+                        const subjectEmoji = subjectCard.querySelector('.subject-emoji');
+                        subjectEmoji.classList.add('completed');
+                        subjectEmoji.textContent = '';
+                    }
+                    
                     const completeButton = chapterItem.querySelector('.chapter-complete');
                     completeButton.classList.add('celebrating');
                     createFireworks();
@@ -375,6 +414,18 @@
                     setTimeout(() => {
                         completeButton.classList.remove('celebrating');
                     }, 500);
+                } else {
+                    // Remettre la barre de progression à 0%
+                    const progressBar = chapterItem.querySelector('.chapter-progress-fill');
+                    progressBar.style.width = '0%';
+                    
+                    // Restaurer l'emoji de la matière si ce n'est plus complet
+                    const subjectCard = chapterItem.closest('.subject-card');
+                    const subjectEmoji = subjectCard.querySelector('.subject-emoji');
+                    subjectEmoji.classList.remove('completed');
+                    // Restaurer l'emoji d'origine
+                    const subject = subjectCard.querySelector('.subject-title h3').textContent;
+                    subjectEmoji.textContent = SUBJECTS_CONFIG[subject].emoji;
                 }
                 
                 updateStats();
@@ -400,7 +451,7 @@
             document.querySelector('.progress-fill').style.width = `${progress}%`;
             document.getElementById('progress-percentage').textContent = `${Math.round(progress)}%`;
 
-            // Mise à jour des compteurs par matière
+            // Mise à jour des compteurs, barres et emoji par matière
             document.querySelectorAll('.subject-card').forEach(card => {
                 const subjectChapters = card.querySelectorAll('.chapter-item').length;
                 const subjectCompleted = card.querySelectorAll('.chapter-item input[type="checkbox"]:checked').length;
@@ -408,6 +459,21 @@
                 if (progressInfo) {
                     progressInfo.querySelector('.completed').textContent = subjectCompleted;
                     progressInfo.querySelector('.total').textContent = subjectChapters;
+                }
+                // Barre de progression catégorie
+                const bar = card.querySelector('.subject-category-progress-fill');
+                const percent = subjectChapters > 0 ? (subjectCompleted / subjectChapters) * 100 : 0;
+                if (bar) bar.style.width = percent + '%';
+
+                // Emoji : croix verte seulement si tout est fait
+                const emoji = card.querySelector('.subject-emoji');
+                const subject = card.querySelector('.subject-title h3').textContent;
+                if (subjectChapters > 0 && subjectCompleted === subjectChapters) {
+                    emoji.classList.add('completed');
+                    emoji.textContent = '';
+                } else {
+                    emoji.classList.remove('completed');
+                    emoji.textContent = SUBJECTS_CONFIG[subject].emoji;
                 }
             });
         }
