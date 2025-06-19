@@ -89,7 +89,6 @@ document.addEventListener('DOMContentLoaded', () => {
         { name: "Tâches", url: "/menu/taches/taches.html", icon: "fa-tasks" },
         { name: "Notes", url: "/menu/notes/notes.html", icon: "fa-sticky-note" },
         { name: "Documents", url: "/menu/documents/documents.html", icon: "fa-file-alt" },
-        { name: "Gestion des Liens", url: "/menu/admin/admin.html", icon: "fa-tools" },
         { name: "A.I", url: "/menu/AI/ai.html", icon: "fa-robot" }
     ];
 
