@@ -9,7 +9,27 @@
 <body>
     <div class="welcome-container">
         <h1>Bienvenue sur votre Hub !</h1>
-        <p>Ceci est votre tableau de bord local. Utilisez le menu à gauche pour naviguer vers vos applications principales.</p>
+        <div class="frames-row">
+            <div class="frame-card">
+                <div class="frame-content" id="date-jour"></div>
+            </div>
+            <div class="frame-card small-frame">
+                <div class="frame-content" id="meteo">Chargement météo...</div>
+            </div>
+            <div class="frame-card small-frame">
+                <div class="frame-content" id="heure">--:--</div>
+            </div>
+        </div>
+        <div class="frame-card tasks-frame">
+            <div class="tasks-container">
+                <nav class="tasks-categories">
+                    <div id="tasks-categories"></div>
+                </nav>
+                <div class="tasks-content">
+                    <div id="tasks-list" class="tasks-list"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <div class="section-container">
