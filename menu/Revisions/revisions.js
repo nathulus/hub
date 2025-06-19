@@ -392,7 +392,7 @@
                 if (checkbox.checked) {
                     // Mettre à jour la barre de progression à 100%
                     const progressBar = chapterItem.querySelector('.chapter-progress-fill');
-                    progressBar.style.width = '100%';
+                    if (progressBar) progressBar.style.width = '100%';
                     
                     // Mettre à jour l'emoji de la matière si tous les chapitres sont terminés
                     const subjectCard = chapterItem.closest('.subject-card');
@@ -417,7 +417,7 @@
                 } else {
                     // Remettre la barre de progression à 0%
                     const progressBar = chapterItem.querySelector('.chapter-progress-fill');
-                    progressBar.style.width = '0%';
+                    if (progressBar) progressBar.style.width = '0%';
                     
                     // Restaurer l'emoji de la matière si ce n'est plus complet
                     const subjectCard = chapterItem.closest('.subject-card');
